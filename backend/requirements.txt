@@ -1,0 +1,60 @@
+# ─── Core ──────────────────────────────────────────────
+fastapi==0.115.0
+uvicorn[standard]==0.30.0
+pydantic==2.9.0
+pydantic-settings==2.5.0
+python-dotenv==1.0.1
+python-multipart==0.0.9
+
+# ─── Auth ──────────────────────────────────────────────
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.0
+
+# ─── Database ──────────────────────────────────────────
+sqlalchemy[asyncio]==2.0.35
+aiosqlite==0.20.0
+asyncpg==0.29.0
+alembic==1.13.0
+neo4j==5.25.0
+elasticsearch[async]==8.13.0
+redis==5.1.0
+boto3==1.35.0         # MinIO S3-compatible
+email-validator==2.2.0  # Required by Pydantic EmailStr
+
+# ─── Task Queue ────────────────────────────────────────
+celery==5.4.0
+
+# ─── OSINT Modules (ALL FREE, NO API KEY) ──────────────
+aiohttp==3.10.0       # Async HTTP for all modules
+httpx==0.27.0         # Modern HTTP client
+beautifulsoup4==4.12.3
+lxml==5.3.0
+
+# Identity
+phonenumbers==8.13.0  # Phone number parsing (free)
+
+# Network
+python-whois==0.9.4   # WHOIS lookups (free)
+dnspython==2.6.0      # DNS resolution (free)
+python-nmap==0.7.1    # Port scanning (free, needs nmap)
+
+# Document OSINT
+Pillow==10.4.0        # Image processing + EXIF
+ExifRead==3.0.0       # EXIF metadata extraction
+PyPDF2==3.0.1         # PDF metadata
+python-docx==1.1.2    # DOCX metadata
+
+# ─── AI Analyst ────────────────────────────────────────
+openai==1.50.0        # ChatGPT 5.5 API
+spacy==3.7.6          # NER entity extraction (local)
+
+# ─── Report Generation ────────────────────────────────
+weasyprint==62.0      # PDF report generation
+jinja2==3.1.4         # HTML templating
+stix2==3.0.1          # STIX/TAXII export
+
+# ─── Monitoring & Utils ────────────────────────────────
+structlog==24.4.0     # Structured logging
+prometheus-client==0.21.0
+websockets==13.0

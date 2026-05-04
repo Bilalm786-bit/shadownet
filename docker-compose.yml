@@ -1,0 +1,113 @@
+version: "3.9"
+
+services:
+  # ─── PostgreSQL (Users, Cases, Targets) ───────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: shadownet-postgres
+    environment:
+      POSTGRES_DB: shadownet
+      POSTGRES_USER: shadownet
+      POSTGRES_PASSWORD: shadownet_secret_2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shadownet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis (Task Queue Broker + Cache) ────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: shadownet-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Neo4j (Entity Relationship Graph) ────────────────────
+  neo4j:
+    image: neo4j:5-community
+    container_name: shadownet-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/shadownet_graph_2024
+      NEO4J_PLUGINS: '["apoc"]'
+    ports:
+      - "7474:7474"   # Browser UI
+      - "7687:7687"   # Bolt protocol
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "shadownet_graph_2024", "RETURN 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─── Elasticsearch (Full-text Intel Search) ───────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: shadownet-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─── MinIO (Evidence & Media Object Store) ────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: shadownet-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: shadownet
+      MINIO_ROOT_PASSWORD: shadownet_minio_2024
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console UI
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─── ShadowNet Backend API ────────────────────────────
+  backend:
+    build: ./backend
+    container_name: shadownet-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  neo4j_data:
+  es_data:
+  minio_data:
