@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { HiOutlineBell, HiOutlineFilter, HiOutlineLightningBolt, HiOutlineRefresh } from 'react-icons/hi';
+import { wsUrl } from '../api/ws';
 
 type EventKind = 'all' | 'scan' | 'threat' | 'alert' | 'ai';
 
@@ -88,8 +89,7 @@ export default function FeedPage() {
   const wsRef = useRef<WebSocket | null>(null);
 
   const connect = () => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/feed?user_id=feed`);
+    const ws = new WebSocket(wsUrl('/ws/feed?user_id=feed'));
     wsRef.current = ws;
     ws.onopen = () => {
       setConnected(true);

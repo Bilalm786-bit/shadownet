@@ -143,6 +143,48 @@ shadownet/
 └── .env.example
 ```
 
+## ☁️ Free Public Deployment — Vercel + Render
+
+ShadowNet ships ready to deploy on the standard free GitHub-connected combo:
+
+- **Frontend → Vercel** (static SPA, free, fast CDN)
+- **Backend → Render** (free web service, supports WebSockets and the
+  background threat-intel scheduler)
+
+### 1. Backend on Render
+
+1. Push the repo to GitHub (the `render.yaml` at the root is the blueprint).
+2. Go to https://render.com → **New + → Blueprint** → select this repo.
+3. Render reads `render.yaml` and creates the **shadownet-backend** web
+   service. Confirm and click **Apply**.
+4. Wait for the first deploy (~3 min). Note the URL it gives you, e.g.
+   `https://shadownet-backend.onrender.com`.
+5. After the frontend is up (next step) come back to the Render service →
+   **Environment** → set `CORS_ORIGINS` to your Vercel URL, e.g.
+   `https://shadownet-frontend.vercel.app`. The service redeploys.
+
+> Render free dynos sleep after 15 min idle. Keep it warm with a free
+> [UptimeRobot](https://uptimerobot.com) monitor hitting `/health` every 5 min.
+> For data that survives redeploys, attach the free Render Postgres add-on
+> and set `DATABASE_URL=postgresql+asyncpg://...` on the service.
+
+### 2. Frontend on Vercel
+
+1. Go to https://vercel.com → **Add New → Project** → import this repo.
+2. Set the project root to `frontend` (Vercel auto-detects Vite).
+3. Add an environment variable:
+   - `VITE_API_URL` = the Render URL from step 1, e.g.
+     `https://shadownet-backend.onrender.com`
+4. Click **Deploy**. Future pushes auto-deploy.
+
+That's it — the frontend now talks to the Render backend over HTTPS for
+REST and WSS for the live threat-intel WebSocket.
+
+### Local dev still works the same
+
+`VITE_API_URL` is empty by default, so `npm run dev` keeps using the Vite
+proxy to `http://localhost:8000`.
+
 ## ⚠️ Legal Disclaimer
 
 This tool is designed for **authorized security testing and OSINT research only**. Always ensure you have proper authorization before conducting any reconnaissance activities.

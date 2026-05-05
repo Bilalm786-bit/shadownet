@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dashboardAPI, threatIntelAPI } from '../api/client';
+import { wsUrl } from '../api/ws';
 import {
   HiOutlineFolder, HiOutlineUser, HiOutlineChartBar, HiOutlineBell,
   HiOutlineShieldExclamation, HiOutlineFire, HiOutlineLightningBolt,
@@ -58,8 +59,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/feed?user_id=dashboard`);
+    const ws = new WebSocket(wsUrl('/ws/feed?user_id=dashboard'));
     wsRef.current = ws;
     ws.onopen = () => setWsConnected(true);
     ws.onclose = () => setWsConnected(false);

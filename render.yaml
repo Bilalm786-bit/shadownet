@@ -1,0 +1,54 @@
+# ShadowNet — Render Blueprint
+# https://render.com/docs/blueprint-spec
+#
+# Click "New + → Blueprint" in Render, point at this repo, and Render will
+# auto-create the backend web service below from this file.
+#
+# After it's live, set:
+#   - Vercel env var:   VITE_API_URL = https://<your-backend>.onrender.com
+#   - Render env var:   CORS_ORIGINS = https://<your-app>.vercel.app
+
+services:
+  - type: web
+    name: shadownet-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    branch: main
+    autoDeploy: true
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: APP_NAME
+        value: ShadowNet
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        # Render free disk is ephemeral; SQLite resets on each redeploy.
+        # For persistent storage attach a Render Postgres add-on and set
+        # DATABASE_URL=postgresql+asyncpg://... here.
+        value: "sqlite+aiosqlite:///./shadownet.db"
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        # Set this in the Render dashboard once you know the Vercel URL,
+        # e.g. https://shadownet-frontend.vercel.app
+        sync: false
+      # ── Optional integrations (leave blank if unused) ───────────
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: VIRUSTOTAL_API_KEY
+        sync: false
+      - key: CENSYS_API_ID
+        sync: false
+      - key: CENSYS_API_SECRET
+        sync: false
+      - key: CURSOR_API_KEY
+        sync: false

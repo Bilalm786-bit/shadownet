@@ -4,8 +4,8 @@ Loads all settings from environment variables / .env file.
 """
 
 from pydantic_settings import BaseSettings
-from pydantic import Field
-from typing import List
+from pydantic import Field, field_validator
+from typing import List, Union
 import json
 
 
@@ -15,7 +15,27 @@ class Settings(BaseSettings):
     app_version: str = "2.0.0"
     debug: bool = True
     secret_key: str = "change-this-to-a-random-64-char-string"
-    cors_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+    # Accept comma-separated env value, JSON list, or single origin.
+    # Use "*" to allow any origin (dev only — not recommended in production).
+    cors_origins: Union[List[str], str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _split_cors(cls, v):
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
+            if v.startswith("["):
+                try:
+                    return json.loads(v)
+                except Exception:
+                    pass
+            return [o.strip() for o in v.split(",") if o.strip()]
+        return v
 
     # ─── Database (SQLite dev / PostgreSQL prod) ───────
     database_url: str = "sqlite+aiosqlite:///./shadownet.db"

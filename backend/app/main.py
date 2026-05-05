@@ -114,9 +114,17 @@ app = FastAPI(
 
 
 # ─── CORS ───────────────────────────────────────────────
+_cors_origins = settings.cors_origins or []
+_allow_origin_regex = None
+if _cors_origins == ["*"]:
+    # Wildcard requested → use regex form so we can still send credentials
+    _allow_origin_regex = ".*"
+    _cors_origins = []
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=_cors_origins,
+    allow_origin_regex=_allow_origin_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

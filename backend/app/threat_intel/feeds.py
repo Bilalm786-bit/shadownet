@@ -606,14 +606,25 @@ class ThreatIntelAggregator:
 
     def latest(self, limit: int = 50, ioc_type: Optional[str] = None,
                severity: Optional[str] = None, source: Optional[str] = None) -> List[Indicator]:
-        items = list(self.recent_events) or list(reversed(self.indicators))
-        if ioc_type:
-            items = [i for i in items if i.get("ioc_type") == ioc_type]
-        if severity:
-            items = [i for i in items if i.get("severity") == severity]
-        if source:
-            items = [i for i in items if i.get("source") == source]
-        return items[:limit]
+        # Start with the rolling buffer (newest first) and fall back / extend
+        # with the full cache so filter queries always have data to draw from.
+        seen: Set[str] = set()
+        merged: List[Indicator] = []
+        for ind in list(self.recent_events) + list(reversed(self.indicators)):
+            k = self._key(ind)
+            if k in seen:
+                continue
+            seen.add(k)
+            if ioc_type and ind.get("ioc_type") != ioc_type:
+                continue
+            if severity and ind.get("severity") != severity:
+                continue
+            if source and ind.get("source") != source:
+                continue
+            merged.append(ind)
+            if len(merged) >= limit:
+                break
+        return merged
 
 
 # Singleton

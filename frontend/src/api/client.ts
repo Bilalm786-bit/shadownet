@@ -1,6 +1,14 @@
 import axios from 'axios';
 
-const API_BASE = '/api/v1';
+// Base URL resolution:
+//   - In dev, leave empty → Vite proxies /api/* to localhost:8000.
+//   - In prod (Vercel), set VITE_API_URL=https://<your-backend>.onrender.com
+//     and we'll prefix it; "/api/v1/..." becomes
+//     "https://<your-backend>.onrender.com/api/v1/...".
+const RAW = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+export const API_HOST = RAW;
+export const API_BASE = `${RAW}/api/v1`;
+
 const api = axios.create({ baseURL: API_BASE });
 
 api.interceptors.request.use((config) => {

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { threatIntelAPI } from '../api/client';
+import { wsUrl } from '../api/ws';
 import {
   HiOutlineShieldExclamation, HiOutlineRefresh, HiOutlineSearch,
   HiOutlineGlobe, HiOutlineLightningBolt, HiOutlineFire,
@@ -149,8 +150,7 @@ export default function ThreatIntelPage() {
   }, []);
 
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}/ws/feed?user_id=threat-intel`);
+    const ws = new WebSocket(wsUrl('/ws/feed?user_id=threat-intel'));
     wsRef.current = ws;
     ws.onopen = () => setWsConnected(true);
     ws.onclose = () => setWsConnected(false);
