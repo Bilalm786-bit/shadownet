@@ -16,6 +16,7 @@ import InvestigatePage from './pages/InvestigatePage';
 import PersonInvestigation from './pages/PersonInvestigation';
 import NetworkInvestigation from './pages/NetworkInvestigation';
 import WebsiteInvestigation from './pages/WebsiteInvestigation';
+import ThreatIntelPage from './pages/ThreatIntelPage';
 
 function ProtectedLayout() {
   const { token, loading } = useAuth();
@@ -48,6 +49,7 @@ export default function App() {
             <Route path="/cases/:caseId" element={<CaseDetailPage />} />
             <Route path="/graph/:caseId" element={<GraphPage />} />
             <Route path="/darkweb" element={<DarkWebPage />} />
+            <Route path="/threat-intel" element={<ThreatIntelPage />} />
             <Route path="/feed" element={<FeedPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/modules" element={<ModulesPage />} />

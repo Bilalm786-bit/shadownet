@@ -54,14 +54,27 @@ class SubdomainEnum(OSINTModule):
             "office", "exchange", "autodiscover", "lyncdiscover",
         ]
 
+        import asyncio
         import dns.resolver
-        for sub in common_subs:
+        resolver = dns.resolver.Resolver()
+        resolver.timeout = 2
+        resolver.lifetime = 2
+
+        async def _check(sub: str):
             fqdn = f"{sub}.{domain}"
             try:
-                dns.resolver.resolve(fqdn, "A")
+                await asyncio.to_thread(resolver.resolve, fqdn, "A")
                 subdomains.add(fqdn)
             except Exception:
                 pass
+
+        sem = asyncio.Semaphore(40)
+
+        async def _bound(sub: str):
+            async with sem:
+                await _check(sub)
+
+        await asyncio.gather(*[_bound(s) for s in common_subs], return_exceptions=True)
 
         # Build entities
         for subdomain in sorted(subdomains):

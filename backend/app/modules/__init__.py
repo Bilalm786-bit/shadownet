@@ -189,4 +189,11 @@ try:
 except Exception as e:
     logger.warning("[-] Failed to load socmint.github_recon", error=str(e))
 
+# ─── Threat Intel Modules ──────────────────────────────────
+try:
+    from app.modules.threat.threat_intel_lookup import ThreatIntelLookup
+    logger.info("[+] Module loaded: threat.intel_lookup")
+except Exception as e:
+    logger.warning("[-] Failed to load threat.intel_lookup", error=str(e))
+
 # NOTE: darkweb.onion_crawler is loaded via app.darkweb.__init__ (imported by darkweb API router)

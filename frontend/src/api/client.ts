@@ -111,6 +111,17 @@ export const darkwebAPI = {
   exportResults: (q: string, format: string = 'json') => api.get('/darkweb/export', { params: { q, format } }),
 };
 
+// Threat Intelligence
+export const threatIntelAPI = {
+  status: () => api.get('/threat-intel/status'),
+  feeds: () => api.get('/threat-intel/feeds'),
+  refresh: (feeds?: string[]) => api.post('/threat-intel/refresh', feeds || null),
+  indicators: (params?: { type?: string; severity?: string; source?: string; limit?: number }) =>
+    api.get('/threat-intel/indicators', { params }),
+  lookup: (value: string) => api.get('/threat-intel/lookup', { params: { value } }),
+  summary: () => api.get('/threat-intel/summary'),
+};
+
 // Cursor Cloud Agent
 export const cursorAgentAPI = {
   create: (data: { prompt: string; repo_url: string; starting_ref?: string; model_id?: string; auto_create_pr?: boolean; branch_name?: string }) => api.post('/cursor-agent/create', data),
