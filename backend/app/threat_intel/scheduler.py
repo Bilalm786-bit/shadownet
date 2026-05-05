@@ -65,7 +65,7 @@ class ThreatIntelScheduler:
         # On the initial pass, exclude very large feeds to avoid slow startup.
         if initial:
             feeds = ["urlhaus", "threatfox", "feodo", "openphish",
-                     "cisa_kev", "nvd", "otx", "spamhaus"]
+                     "cisa_kev", "nvd", "github_advisories", "spamhaus"]
         else:
             feeds = None  # all
         result = await threat_intel_aggregator.refresh(feeds=feeds)

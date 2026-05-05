@@ -39,6 +39,7 @@ async def feeds(current_user: dict = Depends(get_current_user)):
         "cisa_kev": ("Known Exploited Vulnerabilities", "CISA", "cve"),
         "nvd": ("Recently published CVEs", "NIST NVD", "cve"),
         "otx": ("AlienVault OTX threat pulses", "AT&T Cybersecurity", "pulse"),
+        "github_advisories": ("Reviewed security advisories (GHSA/CVE)", "GitHub", "advisory"),
         "tor_exits": ("Tor exit node IP list", "Tor Project", "ip"),
         "spamhaus": ("Criminal network blocks (DROP/EDROP)", "Spamhaus", "cidr"),
     }

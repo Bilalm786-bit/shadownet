@@ -116,46 +116,57 @@ async def feed_urlhaus(session: aiohttp.ClientSession, limit: int = 200) -> List
 
 
 async def feed_threatfox(session: aiohttp.ClientSession, limit: int = 300) -> List[Indicator]:
-    """abuse.ch ThreatFox — IOC database (POST API, no key)."""
+    """abuse.ch ThreatFox — recent IOCs (public CSV export, no auth)."""
     out: List[Indicator] = []
+    text = await _fetch_text(session, "https://threatfox.abuse.ch/export/csv/recent/")
+    if not text:
+        return out
     try:
-        async with session.post(
-            "https://threatfox-api.abuse.ch/api/v1/",
-            json={"query": "get_iocs", "days": 3},
-            timeout=HTTP_TIMEOUT,
-            ssl=False,
-        ) as r:
-            if r.status != 200:
-                return out
-            data = await r.json(content_type=None)
-            for item in (data.get("data") or [])[:limit]:
-                ioc_type = item.get("ioc_type", "").lower()
-                # Normalize type
-                norm = {
-                    "ip:port": "ip", "url": "url", "domain": "domain",
-                    "md5_hash": "hash_md5", "sha1_hash": "hash_sha1",
-                    "sha256_hash": "hash_sha256",
-                }.get(ioc_type, ioc_type or "indicator")
-                value = item.get("ioc", "")
-                if norm == "ip" and ":" in value:
-                    value = value.split(":")[0]
-                out.append(Indicator.make(
-                    ioc_type=norm,
-                    value=value,
-                    source="threatfox.abuse.ch",
-                    threat=item.get("malware_printable") or item.get("threat_type", "malware"),
-                    severity="high",
-                    first_seen=item.get("first_seen"),
-                    tags=item.get("tags") or [],
-                    reference=f"https://threatfox.abuse.ch/ioc/{item.get('id')}/",
-                    confidence=float(item.get("confidence_level", 75)) / 100.0,
-                    extra={
-                        "malware_alias": item.get("malware_alias"),
-                        "threat_type": item.get("threat_type"),
-                    },
-                ))
+        # Strip leading comment lines
+        lines = [ln for ln in text.splitlines() if ln and not ln.startswith("#")]
+        reader = csv.reader(lines, skipinitialspace=True)
+        # Header may be the first non-comment line — skip if it doesn't look like data
+        rows = list(reader)
+        if rows and rows[0] and rows[0][0].lower().startswith("first_seen"):
+            rows = rows[1:]
+        for row in rows[:limit]:
+            if len(row) < 14:
+                continue
+            (first_seen, ioc_id, ioc_value, ioc_type_raw, threat_type,
+             fk_malware, malware_alias, malware_printable, _last_seen,
+             confidence, _compromised, reference, tags_field, _anon, *_rest) = row + [""] * (15 - len(row))
+            ioc_type = ioc_type_raw.lower()
+            norm = {
+                "ip:port": "ip", "url": "url", "domain": "domain",
+                "md5_hash": "hash_md5", "sha1_hash": "hash_sha1",
+                "sha256_hash": "hash_sha256",
+            }.get(ioc_type, ioc_type or "indicator")
+            value = ioc_value
+            if norm == "ip" and ":" in value:
+                value = value.split(":")[0]
+            try:
+                conf = float(confidence) / 100.0
+            except (TypeError, ValueError):
+                conf = 0.75
+            tags = [t.strip() for t in tags_field.split(",") if t.strip()]
+            out.append(Indicator.make(
+                ioc_type=norm,
+                value=value,
+                source="threatfox.abuse.ch",
+                threat=malware_printable or threat_type or "malware",
+                severity="high",
+                first_seen=first_seen,
+                tags=tags or [threat_type] if threat_type else tags,
+                reference=f"https://threatfox.abuse.ch/ioc/{ioc_id}/",
+                confidence=conf,
+                extra={
+                    "malware_alias": malware_alias,
+                    "threat_type": threat_type,
+                    "external_reference": reference,
+                },
+            ))
     except Exception as e:
-        logger.warning("threatfox failed", error=str(e))
+        logger.warning("threatfox parse failed", error=str(e))
     return out
 
 
@@ -206,10 +217,22 @@ async def feed_openphish(session: aiohttp.ClientSession, limit: int = 200) -> Li
 
 
 async def feed_phishtank(session: aiohttp.ClientSession, limit: int = 200) -> List[Indicator]:
-    """PhishTank verified phishing URLs — free public dump."""
+    """PhishTank — verified phishing URLs (public download, no key)."""
     out: List[Indicator] = []
-    # Public verified-online dump (no API key required for the public copy)
-    data = await _fetch_json(session, "https://data.phishtank.com/data/online-valid.json")
+    # Try the gzipped public download (no key required)
+    try:
+        async with session.get(
+            "http://data.phishtank.com/data/online-valid.json",
+            timeout=HTTP_TIMEOUT,
+            ssl=False,
+            headers={"User-Agent": USER_AGENT},
+        ) as r:
+            if r.status != 200:
+                return out
+            data = await r.json(content_type=None)
+    except Exception as e:
+        logger.debug("phishtank fetch failed", error=str(e))
+        return out
     if not isinstance(data, list):
         return out
     for item in data[:limit]:
@@ -227,6 +250,50 @@ async def feed_phishtank(session: aiohttp.ClientSession, limit: int = 200) -> Li
             reference=item.get("phish_detail_url", ""),
             confidence=0.95,
             extra={"target": item.get("target")},
+        ))
+    return out
+
+
+async def feed_github_advisories(session: aiohttp.ClientSession, limit: int = 50) -> List[Indicator]:
+    """GitHub Advisory Database — recent reviewed CVEs/GHSAs (no key, public)."""
+    out: List[Indicator] = []
+    data = await _fetch_json(
+        session,
+        f"https://api.github.com/advisories?per_page={limit}&type=reviewed",
+    )
+    if not isinstance(data, list):
+        return out
+    for item in data[:limit]:
+        ghsa = item.get("ghsa_id") or item.get("cve_id")
+        if not ghsa:
+            continue
+        sev = (item.get("severity") or "medium").lower()
+        if sev not in ("critical", "high", "medium", "low"):
+            sev = "medium"
+        out.append(Indicator.make(
+            ioc_type="advisory",
+            value=ghsa,
+            source="github.com/advisories",
+            threat=item.get("summary") or "GitHub security advisory",
+            severity=sev,
+            first_seen=item.get("published_at"),
+            tags=["advisory", "ghsa"] + ([item.get("cve_id")] if item.get("cve_id") else []),
+            reference=item.get("html_url") or item.get("url", ""),
+            confidence=1.0,
+            extra={
+                "cve_id": item.get("cve_id"),
+                "ghsa_id": item.get("ghsa_id"),
+                "cwe_ids": [c.get("cwe_id") for c in (item.get("cwes") or [])],
+                "cvss_score": (item.get("cvss") or {}).get("score"),
+                "vulnerabilities": [
+                    {
+                        "package": ((v.get("package") or {}).get("name")),
+                        "ecosystem": ((v.get("package") or {}).get("ecosystem")),
+                        "vulnerable_version_range": v.get("vulnerable_version_range"),
+                    }
+                    for v in (item.get("vulnerabilities") or [])[:5]
+                ],
+            },
         ))
     return out
 
@@ -318,21 +385,24 @@ async def feed_nvd_recent(session: aiohttp.ClientSession, limit: int = 50) -> Li
 
 
 async def feed_otx_pulses(session: aiohttp.ClientSession, limit: int = 30) -> List[Indicator]:
-    """AlienVault OTX recent public pulses (no key required for public endpoints)."""
+    """AlienVault OTX recent public pulses.
+
+    OTX has gradually locked the public endpoints behind an API key. We attempt
+    the un-authenticated routes and silently return empty if blocked — the
+    aggregator still functions with the other 9 feeds.
+    """
     out: List[Indicator] = []
-    data = await _fetch_json(
-        session,
-        f"https://otx.alienvault.com/api/v1/pulses/subscribed?limit={limit}",
-    )
-    # If unauthenticated route blocks, try the public pulses index
-    if not isinstance(data, dict) or not data.get("results"):
+    for path in ("activity/pulses", "pulses/subscribed", "search/pulses"):
         data = await _fetch_json(
             session,
-            f"https://otx.alienvault.com/api/v1/search/pulses?limit={limit}",
+            f"https://otx.alienvault.com/api/v1/{path}?limit={limit}",
         )
-    if not isinstance(data, dict):
+        if isinstance(data, dict) and data.get("results"):
+            pulses = data["results"]
+            break
+    else:
         return out
-    pulses = data.get("results") or []
+
     for pulse in pulses[:limit]:
         pid = pulse.get("id")
         name = pulse.get("name") or "OTX Pulse"
@@ -420,6 +490,7 @@ ALL_FEEDS = {
     "cisa_kev": feed_cisa_kev,
     "nvd": feed_nvd_recent,
     "otx": feed_otx_pulses,
+    "github_advisories": feed_github_advisories,
     "tor_exits": feed_tor_exits,
     "spamhaus": feed_spamhaus_drop,
 }

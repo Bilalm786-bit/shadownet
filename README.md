@@ -64,7 +64,7 @@ npm run dev
 | `identity.username_lookup` | Identity | Check 300+ platforms |
 | `identity.email_validator` | Identity | MX, SMTP, pattern validation |
 | `identity.phone_lookup` | Identity | Phone number parsing & OSINT |
-| `network.dns_recon` | Network | DNS record enumeration |
+| `network.dns_recon` | Network | DNS record enumeration (async) |
 | `network.whois_lookup` | Network | WHOIS registration data |
 | `network.ip_geolocation` | Network | IP geolocation & ASN |
 | `network.subdomain_enum` | Network | Subdomain discovery |
@@ -73,6 +73,30 @@ npm run dev
 | `socmint.github_recon` | SOCMINT | GitHub profile intelligence |
 | `breach.google_dorker` | Breach | Google dorking for leaks |
 | `darkweb.onion_search` | Dark Web | Ahmia.fi clearnet search |
+| `threat.intel_lookup` | Threat Intel | Cross-reference any IOC against 10 live feeds |
+
+## 🛰️ Real-time Threat Intelligence
+
+ShadowNet ships with a built-in threat-intel aggregator that pulls fresh IOCs every 10 minutes
+from public feeds and pushes new indicators over a WebSocket so the dashboard updates live —
+no API keys required.
+
+| Feed | IOC type | Vendor |
+|------|----------|--------|
+| URLhaus | URL | abuse.ch |
+| ThreatFox | IP / URL / domain / hash | abuse.ch |
+| Feodo Tracker | botnet C2 IP | abuse.ch |
+| OpenPhish | URL | OpenPhish |
+| PhishTank | URL | PhishTank |
+| CISA KEV | exploited CVE | CISA |
+| NVD recent | CVE | NIST |
+| AlienVault OTX | pulse | AT&T |
+| GitHub Advisories | GHSA / CVE | GitHub |
+| Tor exit list | IP | Tor Project |
+| Spamhaus DROP/EDROP | CIDR | Spamhaus |
+
+API endpoints under `/api/v1/threat-intel/`: `status`, `feeds`, `refresh`, `indicators`,
+`lookup`, `summary`. See the **Threat Intel** page in the UI for the live dashboard.
 
 ## 🛡️ Tech Stack
 
