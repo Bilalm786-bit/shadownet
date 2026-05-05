@@ -12,6 +12,7 @@ const investigateItems = [
 const navItems = [
   { to: '/', icon: <HiOutlineViewGrid />, label: 'Dashboard' },
   { to: '/investigate', icon: <HiOutlineShieldExclamation />, label: 'Auto-Investigate' },
+  { to: '/threat-intel', icon: <HiOutlineShieldCheck />, label: 'Threat Intel' },
   { to: '/cases', icon: <HiOutlineFolder />, label: 'Cases' },
   { to: '/darkweb', icon: <HiOutlineGlobe />, label: 'Dark Web' },
   { to: '/feed', icon: <HiOutlineBell />, label: 'Live Feed' },

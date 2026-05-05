@@ -4,6 +4,7 @@ Domain/IP registration data lookup.
 NO API key — uses python-whois library.
 """
 
+import asyncio
 import whois
 from typing import Dict, Any
 from app.modules.base import OSINTModule, ScanResult, EntityFound, ModuleRegistry
@@ -20,7 +21,11 @@ class WhoisLookup(OSINTModule):
         entities = []
 
         try:
-            w = whois.whois(target)
+            # python-whois is blocking → execute in a thread with a timeout
+            w = await asyncio.wait_for(
+                asyncio.to_thread(whois.whois, target),
+                timeout=20,
+            )
             data = {}
 
             # Extract all available fields

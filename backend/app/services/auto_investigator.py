@@ -47,12 +47,14 @@ TYPE_MODULE_MAP = {
         "network.wayback_machine",
         "breach.google_dorker",
         "breach.breach_checker",
+        "threat.intel_lookup",
     ],
     "ip": [
         "network.ip_geolocation",
         "network.port_scanner",
         "network.shodan_free",
         "breach.google_dorker",
+        "threat.intel_lookup",
     ],
     "username": [
         "identity.username_lookup",
@@ -70,6 +72,7 @@ TYPE_MODULE_MAP = {
         "network.tech_detector",
         "network.web_crawler",
         "breach.google_dorker",
+        "threat.intel_lookup",
     ],
     "person": [
         "identity.username_lookup",

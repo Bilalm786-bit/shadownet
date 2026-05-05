@@ -65,6 +65,7 @@ NETWORK_MODULES = [
     "network.shodan_free",
     "network.virustotal",
     "network.censys",
+    "threat.intel_lookup",
     "breach.tavily_search",
 ]
 
@@ -77,6 +78,7 @@ WEBSITE_MODULES = [
     "network.subdomain_enum",
     "network.wayback_machine",
     "network.virustotal",
+    "threat.intel_lookup",
     "breach.google_dorker",
     "breach.tavily_search",
 ]

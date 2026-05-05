@@ -31,6 +31,7 @@ from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.darkweb import router as darkweb_router
 from app.api.v1.cursor_agent import router as cursor_agent_router
 from app.api.v1.investigate import router as investigate_router
+from app.api.v1.threat_intel import router as threat_intel_router
 
 logger = structlog.get_logger(__name__)
 
@@ -77,12 +78,25 @@ async def lifespan(app: FastAPI):
     else:
         logger.warning("[-] Cursor API key not set — agent features disabled")
 
+    # Start the real-time threat-intelligence scheduler
+    try:
+        from app.threat_intel.scheduler import threat_intel_scheduler
+        await threat_intel_scheduler.start()
+        logger.info("[+] Threat intelligence scheduler started")
+    except Exception as e:
+        logger.warning("[-] Threat intel scheduler failed to start", error=str(e))
+
     logger.info("[OK] ShadowNet is ready", app=settings.app_name)
 
     yield
 
     # Shutdown
     logger.info("[!] ShadowNet shutting down...")
+    try:
+        from app.threat_intel.scheduler import threat_intel_scheduler
+        await threat_intel_scheduler.stop()
+    except Exception:
+        pass
     await Neo4jClient.close()
     await ESClient.close()
     logger.info("Shutdown complete")
@@ -134,6 +148,7 @@ app.include_router(dashboard_router, prefix=API_PREFIX)
 app.include_router(darkweb_router, prefix=API_PREFIX)
 app.include_router(cursor_agent_router, prefix=API_PREFIX)
 app.include_router(investigate_router, prefix=API_PREFIX)
+app.include_router(threat_intel_router, prefix=API_PREFIX)
 app.include_router(ws_router)  # WebSocket at root
 
 

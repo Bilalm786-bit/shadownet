@@ -4,6 +4,7 @@ Full DNS enumeration: A, AAAA, MX, NS, TXT, SOA, CNAME records.
 NO API key — uses dnspython library.
 """
 
+import asyncio
 import dns.resolver
 import dns.reversename
 from typing import Dict, Any, List
@@ -23,9 +24,14 @@ class DNSRecon(OSINTModule):
         entities = []
         dns_records = {}
 
+        # dns.resolver is blocking → run in thread pool with a tight timeout
+        resolver = dns.resolver.Resolver()
+        resolver.timeout = 5
+        resolver.lifetime = 5
+
         for rtype in self.RECORD_TYPES:
             try:
-                answers = dns.resolver.resolve(domain, rtype)
+                answers = await asyncio.to_thread(resolver.resolve, domain, rtype)
                 records = []
                 for rdata in answers:
                     record_str = str(rdata).rstrip(".")
