@@ -69,6 +69,7 @@ export const investigateAPI = {
   }) => api.post('/investigate/person', data),
   network: (target: string) => api.post('/investigate/network', { target }),
   website: (target: string) => api.post('/investigate/website', { target }),
+  exploit: (target: string) => api.post('/investigate/exploit', { target }),
 };
 
 // Dashboard
