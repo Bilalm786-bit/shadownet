@@ -12,6 +12,10 @@ import FeedPage from './pages/FeedPage';
 import SearchPage from './pages/SearchPage';
 import ModulesPage from './pages/ModulesPage';
 import CursorAgentPage from './pages/CursorAgentPage';
+import InvestigatePage from './pages/InvestigatePage';
+import PersonInvestigation from './pages/PersonInvestigation';
+import NetworkInvestigation from './pages/NetworkInvestigation';
+import WebsiteInvestigation from './pages/WebsiteInvestigation';
 
 function ProtectedLayout() {
   const { token, loading } = useAuth();
@@ -36,6 +40,10 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedLayout />}>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/investigate" element={<InvestigatePage />} />
+            <Route path="/investigate/person" element={<PersonInvestigation />} />
+            <Route path="/investigate/network" element={<NetworkInvestigation />} />
+            <Route path="/investigate/website" element={<WebsiteInvestigation />} />
             <Route path="/cases" element={<CasesPage />} />
             <Route path="/cases/:caseId" element={<CaseDetailPage />} />
             <Route path="/graph/:caseId" element={<GraphPage />} />

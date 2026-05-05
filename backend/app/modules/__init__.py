@@ -5,6 +5,7 @@
 import structlog
 logger = structlog.get_logger(__name__)
 
+# ─── Identity Modules ──────────────────────────────────────
 try:
     from app.modules.identity.username_lookup import UsernameLookup
     logger.info("[+] Module loaded: identity.username_lookup")
@@ -23,6 +24,43 @@ try:
 except Exception as e:
     logger.warning("[-] Failed to load identity.phone_lookup", error=str(e))
 
+try:
+    from app.modules.identity.social_analyzer import SocialAnalyzer
+    logger.info("[+] Module loaded: identity.social_analyzer")
+except Exception as e:
+    logger.warning("[-] Failed to load identity.social_analyzer", error=str(e))
+
+try:
+    from app.modules.identity.social_media_scraper import StealthSocialScraper
+    logger.info("[+] Module loaded: identity.social_scraper")
+except Exception as e:
+    logger.warning("[-] Failed to load identity.social_scraper", error=str(e))
+
+try:
+    from app.modules.identity.cnic_lookup import CNICLookup
+    logger.info("[+] Module loaded: identity.cnic_lookup")
+except Exception as e:
+    logger.warning("[-] Failed to load identity.cnic_lookup", error=str(e))
+
+try:
+    from app.modules.identity.whois_person import WhoisPersonLookup
+    logger.info("[+] Module loaded: identity.whois_person")
+except Exception as e:
+    logger.warning("[-] Failed to load identity.whois_person", error=str(e))
+
+try:
+    from app.modules.identity.reverse_image import ReverseImageSearch
+    logger.info("[+] Module loaded: identity.reverse_image")
+except Exception as e:
+    logger.warning("[-] Failed to load identity.reverse_image", error=str(e))
+
+try:
+    from app.modules.identity.stealth_browser import StealthBrowser
+    logger.info("[+] Module loaded: identity.stealth_browser")
+except Exception as e:
+    logger.warning("[-] Failed to load identity.stealth_browser", error=str(e))
+
+# ─── Network Modules ───────────────────────────────────────
 try:
     from app.modules.network.dns_recon import DNSRecon
     logger.info("[+] Module loaded: network.dns_recon")
@@ -54,17 +92,55 @@ except Exception as e:
     logger.warning("[-] Failed to load network.wayback_machine", error=str(e))
 
 try:
-    # BUG FIX: Class name is DocumentOSINT, NOT MetadataExtractor
-    from app.modules.document.metadata_extractor import DocumentOSINT
-    logger.info("[+] Module loaded: document.metadata_extractor")
+    from app.modules.network.port_scanner import PortScanner
+    logger.info("[+] Module loaded: network.port_scanner")
 except Exception as e:
-    logger.warning("[-] Failed to load document.metadata_extractor", error=str(e))
+    logger.warning("[-] Failed to load network.port_scanner", error=str(e))
 
 try:
-    from app.modules.socmint.github_recon import GitHubRecon
-    logger.info("[+] Module loaded: socmint.github_recon")
+    from app.modules.network.ssl_analyzer import SSLAnalyzer
+    logger.info("[+] Module loaded: network.ssl_analyzer")
 except Exception as e:
-    logger.warning("[-] Failed to load socmint.github_recon", error=str(e))
+    logger.warning("[-] Failed to load network.ssl_analyzer", error=str(e))
+
+try:
+    from app.modules.network.tech_detector import TechDetector
+    logger.info("[+] Module loaded: network.tech_detector")
+except Exception as e:
+    logger.warning("[-] Failed to load network.tech_detector", error=str(e))
+
+try:
+    from app.modules.network.web_crawler import WebCrawler
+    logger.info("[+] Module loaded: network.web_crawler")
+except Exception as e:
+    logger.warning("[-] Failed to load network.web_crawler", error=str(e))
+
+try:
+    from app.modules.network.shodan_free import ShodanFree
+    logger.info("[+] Module loaded: network.shodan_free")
+except Exception as e:
+    logger.warning("[-] Failed to load network.shodan_free", error=str(e))
+
+# ─── NEW: VirusTotal Scanner ──────────────────────────────
+try:
+    from app.modules.network.virustotal_scanner import VirusTotalScanner
+    logger.info("[+] Module loaded: network.virustotal")
+except Exception as e:
+    logger.warning("[-] Failed to load network.virustotal", error=str(e))
+
+# ─── NEW: Censys Scanner ─────────────────────────────────
+try:
+    from app.modules.network.censys_scanner import CensysScanner
+    logger.info("[+] Module loaded: network.censys")
+except Exception as e:
+    logger.warning("[-] Failed to load network.censys", error=str(e))
+
+# ─── Breach / OSINT Modules ────────────────────────────────
+try:
+    from app.modules.breach.breach_checker import BreachChecker
+    logger.info("[+] Module loaded: breach.breach_checker")
+except Exception as e:
+    logger.warning("[-] Failed to load breach.breach_checker", error=str(e))
 
 try:
     from app.modules.breach.google_dorker import GoogleDorker
@@ -72,5 +148,45 @@ try:
 except Exception as e:
     logger.warning("[-] Failed to load breach.google_dorker", error=str(e))
 
+try:
+    from app.modules.breach.paste_monitor import PasteMonitor
+    logger.info("[+] Module loaded: breach.paste_monitor")
+except Exception as e:
+    logger.warning("[-] Failed to load breach.paste_monitor", error=str(e))
+
+# ─── NEW: Google Search Intelligence ─────────────────────
+try:
+    from app.modules.breach.google_search_module import GoogleSearchModule
+    logger.info("[+] Module loaded: breach.google_search")
+except Exception as e:
+    logger.warning("[-] Failed to load breach.google_search", error=str(e))
+
+# ─── NEW: Tavily AI Search ───────────────────────────────
+try:
+    from app.modules.breach.tavily_search import TavilySearch
+    logger.info("[+] Module loaded: breach.tavily_search")
+except Exception as e:
+    logger.warning("[-] Failed to load breach.tavily_search", error=str(e))
+
+# ─── NEW: Stealth Scraper ────────────────────────────────
+try:
+    from app.modules.breach.stealth_scraper import StealthScraper
+    logger.info("[+] Module loaded: breach.stealth_scraper")
+except Exception as e:
+    logger.warning("[-] Failed to load breach.stealth_scraper", error=str(e))
+
+# ─── Document Modules ──────────────────────────────────────
+try:
+    from app.modules.document.metadata_extractor import DocumentOSINT
+    logger.info("[+] Module loaded: document.metadata_extractor")
+except Exception as e:
+    logger.warning("[-] Failed to load document.metadata_extractor", error=str(e))
+
+# ─── SOCMINT Modules ───────────────────────────────────────
+try:
+    from app.modules.socmint.github_recon import GitHubRecon
+    logger.info("[+] Module loaded: socmint.github_recon")
+except Exception as e:
+    logger.warning("[-] Failed to load socmint.github_recon", error=str(e))
+
 # NOTE: darkweb.onion_crawler is loaded via app.darkweb.__init__ (imported by darkweb API router)
-# Do NOT import it here — causes circular import with app.darkweb package.

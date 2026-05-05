@@ -30,6 +30,7 @@ from app.api.v1.reports import router as reports_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.darkweb import router as darkweb_router
 from app.api.v1.cursor_agent import router as cursor_agent_router
+from app.api.v1.investigate import router as investigate_router
 
 logger = structlog.get_logger(__name__)
 
@@ -132,6 +133,7 @@ app.include_router(reports_router, prefix=API_PREFIX)
 app.include_router(dashboard_router, prefix=API_PREFIX)
 app.include_router(darkweb_router, prefix=API_PREFIX)
 app.include_router(cursor_agent_router, prefix=API_PREFIX)
+app.include_router(investigate_router, prefix=API_PREFIX)
 app.include_router(ws_router)  # WebSocket at root
 
 

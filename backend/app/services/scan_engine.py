@@ -15,6 +15,7 @@ from app.core.neo4j_client import Neo4jClient
 from app.core.database import async_session  # OWN session factory
 from app.api.v1.websocket import ws_manager
 from app.services.ai_analyst import ai_analyst
+from app.services.auto_investigator import AutoInvestigator
 import structlog
 
 logger = structlog.get_logger(__name__)

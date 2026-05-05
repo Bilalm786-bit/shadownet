@@ -126,6 +126,95 @@ async def list_modules(current_user: dict = Depends(get_current_user)):
     return ModuleRegistry.list_all()
 
 
+@router.post("/auto-investigate")
+async def auto_investigate(
+    payload: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    One-click auto-investigation.
+    Input: { "target": "any-string", "depth": 1-2 }
+    Auto-detects target type and runs ALL relevant modules.
+    """
+    from app.services.auto_investigator import auto_investigator
+
+    target = payload.get("target", "").strip()
+    if not target:
+        raise HTTPException(status_code=400, detail="Target is required")
+
+    depth = min(payload.get("depth", 1), 2)
+    target_type = payload.get("target_type")  # Optional override
+
+    # Run investigation (this may take a while)
+    result = await auto_investigator.investigate(
+        target=target,
+        target_type=target_type,
+        depth=depth,
+    )
+
+    return result
+
+
+@router.post("/quick-scan")
+async def quick_scan(
+    payload: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Quick single-module scan without requiring a case.
+    Input: { "target": "value", "module": "module.name" }
+    """
+    target = payload.get("target", "").strip()
+    module_name = payload.get("module", "").strip()
+
+    if not target or not module_name:
+        raise HTTPException(status_code=400, detail="target and module are required")
+
+    module = ModuleRegistry.get(module_name)
+    if not module:
+        raise HTTPException(status_code=404, detail=f"Module '{module_name}' not found")
+
+    options = payload.get("options", {})
+    result = await module.scan(target, options)
+
+    return {
+        "module": result.module,
+        "target": result.target,
+        "success": result.success,
+        "summary": result.summary,
+        "severity": result.severity,
+        "entity_count": len(result.entities),
+        "entities": [
+            {
+                "type": e.entity_type,
+                "value": e.value,
+                "confidence": e.confidence,
+                "metadata": e.metadata,
+            }
+            for e in result.entities
+        ],
+        "raw_data": result.raw_data,
+        "error": result.error,
+    }
+
+
+@router.get("/detect-type")
+async def detect_target_type(
+    target: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Auto-detect the type of a target string."""
+    from app.services.auto_investigator import AutoInvestigator
+    detected = AutoInvestigator.detect_target_type(target)
+    available_modules = ModuleRegistry.get_modules_for_type(detected)
+    return {
+        "target": target,
+        "detected_type": detected,
+        "available_modules": available_modules,
+        "module_count": len(available_modules),
+    }
+
+
 def _scan_to_response(scan: ScanResult) -> dict:
     """Convert ORM ScanResult to dict, handling enum serialization."""
     return {

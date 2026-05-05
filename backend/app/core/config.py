@@ -12,7 +12,7 @@ import json
 class Settings(BaseSettings):
     # ─── App ────────────────────────────────────────────
     app_name: str = "ShadowNet"
-    app_version: str = "1.0.0"
+    app_version: str = "2.0.0"
     debug: bool = True
     secret_key: str = "change-this-to-a-random-64-char-string"
     cors_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]
@@ -37,9 +37,18 @@ class Settings(BaseSettings):
     minio_secret_key: str = "shadownet_minio_2024"
     minio_bucket: str = "shadownet-evidence"
 
-    # ─── OpenAI (ChatGPT 5.5) ──────────────────────────
+    # ─── OpenAI (ChatGPT) ──────────────────────────────
     openai_api_key: str = ""
     openai_model: str = "gpt-4o"
+
+    # ─── OSINT API Keys ─────────────────────────────────
+    virustotal_api_key: str = ""
+    tavily_api_key: str = ""
+    google_search_api_key: str = ""
+    google_search_cx: str = ""  # Custom Search Engine ID
+    censys_api_id: str = ""
+    censys_api_secret: str = ""
+    stealth_browser_url: str = ""
 
     # ─── Cursor Cloud Agents API ────────────────────────
     cursor_api_key: str = ""
