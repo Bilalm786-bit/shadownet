@@ -79,7 +79,8 @@ async def investigate_website(
     current_user: dict = Depends(get_current_user),
 ):
     """Full website investigation — URL, domain.
-    Runs: tech detection, crawler, SSL, DNS, WHOIS, subdomains, Wayback, VirusTotal.
+    Runs: tech detection, crawler, SSL, DNS, WHOIS, subdomains, Wayback, VirusTotal,
+    plus the expanded recon / enumeration / exploit-surface modules.
     Input: { "target": "URL/domain" }
     """
     target = payload.get("target", "").strip()
@@ -87,4 +88,28 @@ async def investigate_website(
         raise HTTPException(status_code=400, detail="Target is required")
 
     result = await orchestrator.investigate_website(target)
+    return result
+
+
+@router.post("/exploit")
+async def investigate_exploit(
+    payload: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Exploitation-surface preset — focused enumeration + defensive vulnerability
+    discovery for an authorized website / domain. Every module is read-only and
+    non-destructive (no live exploit payloads are issued).
+
+    Modules: security headers, subdomain takeover, CORS, open redirect,
+    reflected-input probe, SQLi error fingerprint, secrets scanner, directory
+    buster, JS endpoint extractor, CMS enumeration, S3 bucket finder,
+    robots/sitemap analyzer, HTTP fingerprint.
+
+    Input: { "target": "URL/domain" }
+    """
+    target = payload.get("target", "").strip()
+    if not target:
+        raise HTTPException(status_code=400, detail="Target is required")
+
+    result = await orchestrator.investigate_exploit(target)
     return result

@@ -67,6 +67,11 @@ NETWORK_MODULES = [
     "network.censys",
     "threat.intel_lookup",
     "breach.tavily_search",
+    # ── Expanded passive network recon ─────────────────
+    "recon.asn_lookup",
+    "recon.cdn_detector",
+    "recon.reverse_ip",
+    "recon.http_fingerprint",
 ]
 
 WEBSITE_MODULES = [
@@ -81,6 +86,41 @@ WEBSITE_MODULES = [
     "threat.intel_lookup",
     "breach.google_dorker",
     "breach.tavily_search",
+    # ── Expanded website recon + enumeration ───────────
+    "recon.cdn_detector",
+    "recon.http_fingerprint",
+    "recon.robots_sitemap",
+    "enumeration.directory_buster",
+    "enumeration.parameter_finder",
+    "enumeration.js_endpoints",
+    "enumeration.cms_enum",
+    "enumeration.s3_buckets",
+    "enumeration.vhost_enum",
+    # ── Defensive exploitation surface checks ──────────
+    "exploit.security_headers",
+    "exploit.subdomain_takeover",
+    "exploit.cors_misconfig",
+    "exploit.open_redirect",
+    "exploit.reflection_probe",
+    "exploit.sqli_fingerprint",
+    "exploit.secrets_scanner",
+]
+
+# ── Dedicated "Exploitation Surface" preset ───────────
+EXPLOIT_MODULES = [
+    "exploit.security_headers",
+    "exploit.subdomain_takeover",
+    "exploit.cors_misconfig",
+    "exploit.open_redirect",
+    "exploit.reflection_probe",
+    "exploit.sqli_fingerprint",
+    "exploit.secrets_scanner",
+    "enumeration.directory_buster",
+    "enumeration.js_endpoints",
+    "enumeration.cms_enum",
+    "enumeration.s3_buckets",
+    "recon.robots_sitemap",
+    "recon.http_fingerprint",
 ]
 
 
@@ -397,6 +437,13 @@ class InvestigationOrchestrator:
 
     async def investigate_website(self, target: str, progress_cb=None) -> Dict[str, Any]:
         return await self._run_investigation("website", target, WEBSITE_MODULES, progress_cb)
+
+    async def investigate_exploit(self, target: str, progress_cb=None) -> Dict[str, Any]:
+        """Run the exploitation-surface preset against a website / domain.
+        Focused on enumeration + defensive vulnerability detection — every module
+        in this preset is read-only and non-destructive.
+        """
+        return await self._run_investigation("exploit", target, EXPLOIT_MODULES, progress_cb)
 
     async def _run_investigation(
         self,

@@ -196,4 +196,121 @@ try:
 except Exception as e:
     logger.warning("[-] Failed to load threat.intel_lookup", error=str(e))
 
+# ─── Recon Modules (passive) ────────────────────────────
+try:
+    from app.modules.recon.asn_lookup import ASNLookup
+    logger.info("[+] Module loaded: recon.asn_lookup")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.asn_lookup", error=str(e))
+
+try:
+    from app.modules.recon.cdn_detector import CDNDetector
+    logger.info("[+] Module loaded: recon.cdn_detector")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.cdn_detector", error=str(e))
+
+try:
+    from app.modules.recon.reverse_ip import ReverseIPLookup
+    logger.info("[+] Module loaded: recon.reverse_ip")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.reverse_ip", error=str(e))
+
+try:
+    from app.modules.recon.http_fingerprint import HTTPFingerprint
+    logger.info("[+] Module loaded: recon.http_fingerprint")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.http_fingerprint", error=str(e))
+
+try:
+    from app.modules.recon.robots_sitemap import RobotsSitemapAnalyzer
+    logger.info("[+] Module loaded: recon.robots_sitemap")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.robots_sitemap", error=str(e))
+
+# ─── Enumeration Modules (active, low-impact) ──────────
+try:
+    from app.modules.enumeration.directory_buster import DirectoryBuster
+    logger.info("[+] Module loaded: enumeration.directory_buster")
+except Exception as e:
+    logger.warning("[-] Failed to load enumeration.directory_buster", error=str(e))
+
+try:
+    from app.modules.enumeration.vhost_enum import VhostEnum
+    logger.info("[+] Module loaded: enumeration.vhost_enum")
+except Exception as e:
+    logger.warning("[-] Failed to load enumeration.vhost_enum", error=str(e))
+
+try:
+    from app.modules.enumeration.parameter_finder import ParameterFinder
+    logger.info("[+] Module loaded: enumeration.parameter_finder")
+except Exception as e:
+    logger.warning("[-] Failed to load enumeration.parameter_finder", error=str(e))
+
+try:
+    from app.modules.enumeration.js_endpoint_extractor import JSEndpointExtractor
+    logger.info("[+] Module loaded: enumeration.js_endpoints")
+except Exception as e:
+    logger.warning("[-] Failed to load enumeration.js_endpoints", error=str(e))
+
+try:
+    from app.modules.enumeration.cms_enum import CMSEnum
+    logger.info("[+] Module loaded: enumeration.cms_enum")
+except Exception as e:
+    logger.warning("[-] Failed to load enumeration.cms_enum", error=str(e))
+
+try:
+    from app.modules.enumeration.s3_bucket_finder import S3BucketFinder
+    logger.info("[+] Module loaded: enumeration.s3_buckets")
+except Exception as e:
+    logger.warning("[-] Failed to load enumeration.s3_buckets", error=str(e))
+
+# ─── Exploitation / Vulnerability Modules ──────────────
+try:
+    from app.modules.exploit.security_headers import SecurityHeaders
+    logger.info("[+] Module loaded: exploit.security_headers")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.security_headers", error=str(e))
+
+try:
+    from app.modules.exploit.cve_matcher import CVEMatcher
+    logger.info("[+] Module loaded: exploit.cve_matcher")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.cve_matcher", error=str(e))
+
+try:
+    from app.modules.exploit.subdomain_takeover import SubdomainTakeover
+    logger.info("[+] Module loaded: exploit.subdomain_takeover")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.subdomain_takeover", error=str(e))
+
+try:
+    from app.modules.exploit.cors_misconfig import CORSMisconfig
+    logger.info("[+] Module loaded: exploit.cors_misconfig")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.cors_misconfig", error=str(e))
+
+try:
+    from app.modules.exploit.open_redirect import OpenRedirect
+    logger.info("[+] Module loaded: exploit.open_redirect")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.open_redirect", error=str(e))
+
+try:
+    from app.modules.exploit.reflection_probe import ReflectionProbe
+    logger.info("[+] Module loaded: exploit.reflection_probe")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.reflection_probe", error=str(e))
+
+try:
+    from app.modules.exploit.sqli_fingerprint import SQLiFingerprint
+    logger.info("[+] Module loaded: exploit.sqli_fingerprint")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.sqli_fingerprint", error=str(e))
+
+try:
+    from app.modules.exploit.secrets_scanner import SecretsScanner
+    logger.info("[+] Module loaded: exploit.secrets_scanner")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.secrets_scanner", error=str(e))
+
 # NOTE: darkweb.onion_crawler is loaded via app.darkweb.__init__ (imported by darkweb API router)
