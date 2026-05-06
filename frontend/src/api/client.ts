@@ -70,6 +70,7 @@ export const investigateAPI = {
   network: (target: string) => api.post('/investigate/network', { target }),
   website: (target: string) => api.post('/investigate/website', { target }),
   exploit: (target: string) => api.post('/investigate/exploit', { target }),
+  vulnScan: (target: string) => api.post('/investigate/vuln-scan', { target }, { timeout: 600000 }),
 };
 
 // Dashboard
