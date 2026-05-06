@@ -183,7 +183,7 @@ export default function DashboardPage() {
         <h2 className="section-title">⬡ Investigation Hub</h2>
       </div>
 
-      <div className="grid-3 stagger" style={{ marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20, marginBottom: 28 }} className="stagger">
         <div className="invest-card person slide-up" onClick={() => navigate('/investigate/person')}>
           <div className="invest-card-icon" style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}>👤</div>
           <div className="invest-card-title" style={{ color: 'var(--accent-hover)' }}>Person Intelligence</div>
@@ -192,8 +192,8 @@ export default function DashboardPage() {
             breach history, dark-web mentions, and compile AI-powered dossiers.
           </div>
           <div className="invest-card-features">
-            <span className="invest-feature">Breach Check</span>
-            <span className="invest-feature">Social Media</span>
+            <span className="invest-feature">Breach</span>
+            <span className="invest-feature">Social</span>
             <span className="invest-feature">Dark Web</span>
             <span className="invest-feature">AI Dossier</span>
           </div>
@@ -203,14 +203,14 @@ export default function DashboardPage() {
           <div className="invest-card-icon" style={{ background: 'var(--cyan-dim)', color: 'var(--cyan)' }}>🌐</div>
           <div className="invest-card-title" style={{ color: 'var(--cyan)' }}>Network Intelligence</div>
           <div className="invest-card-desc">
-            Scan any IP or domain with VirusTotal, Censys, port scanning, DNS recon, SSL analysis,
-            geolocation, and threat-intel cross-reference.
+            Deep network recon: ASN / BGP, DNS (zone transfer, DMARC/SPF/DKIM, DNSSEC),
+            TLS audit, ports, subdomains, CDN / WAF detection, threat-intel.
           </div>
           <div className="invest-card-features">
-            <span className="invest-feature">Threat Intel</span>
+            <span className="invest-feature">ASN</span>
+            <span className="invest-feature">TLS Audit</span>
             <span className="invest-feature">Port Scan</span>
-            <span className="invest-feature">DNS</span>
-            <span className="invest-feature">Shodan</span>
+            <span className="invest-feature">DNS Adv</span>
           </div>
         </div>
 
@@ -218,14 +218,52 @@ export default function DashboardPage() {
           <div className="invest-card-icon" style={{ background: 'var(--orange-dim)', color: 'var(--orange)' }}>🔗</div>
           <div className="invest-card-title" style={{ color: 'var(--orange)' }}>Website Intelligence</div>
           <div className="invest-card-desc">
-            Deep-scan any website for technology stack, SSL certs, subdomains, crawl data,
-            Wayback history, phishing reputation, and security vulnerabilities.
+            Tech stack, SSL, subdomains, content discovery, JS endpoints, CMS enum,
+            Wayback, security headers, takeover, CORS, SQLi/XSS reflection probes.
           </div>
           <div className="invest-card-features">
-            <span className="invest-feature">Tech Stack</span>
-            <span className="invest-feature">SSL Scan</span>
-            <span className="invest-feature">Crawler</span>
-            <span className="invest-feature">Wayback</span>
+            <span className="invest-feature">Tech</span>
+            <span className="invest-feature">JS Mining</span>
+            <span className="invest-feature">CMS Enum</span>
+            <span className="invest-feature">Vuln Probes</span>
+          </div>
+        </div>
+
+        <div
+          className="invest-card slide-up"
+          onClick={() => navigate('/investigate/exploit')}
+          style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.06), rgba(168,85,247,0.04))' }}
+        >
+          <div className="invest-card-icon" style={{ background: 'rgba(245,158,11,0.12)', color: 'var(--orange)' }}>🛡️</div>
+          <div className="invest-card-title" style={{ color: 'var(--orange)' }}>Exploit Surface</div>
+          <div className="invest-card-desc">
+            Read-only enumeration + defensive vulnerability detection. Headers, takeover,
+            CORS, open redirect, reflection, SQLi traces, secrets, sensitive files, defaults.
+          </div>
+          <div className="invest-card-features">
+            <span className="invest-feature">Headers</span>
+            <span className="invest-feature">Takeover</span>
+            <span className="invest-feature">CORS</span>
+            <span className="invest-feature">Secrets</span>
+          </div>
+        </div>
+
+        <div
+          className="invest-card slide-up"
+          onClick={() => navigate('/investigate/vuln-scan')}
+          style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.06), rgba(99,102,241,0.04))' }}
+        >
+          <div className="invest-card-icon" style={{ background: 'rgba(239,68,68,0.12)', color: 'var(--red)' }}>⚡</div>
+          <div className="invest-card-title" style={{ color: 'var(--red)' }}>Vulnerability Scanner</div>
+          <div className="invest-card-desc">
+            Nessus-style unified scan: 35+ recon, enumeration & defensive vuln modules,
+            normalized CVSS-scored findings with evidence, solutions and references.
+          </div>
+          <div className="invest-card-features">
+            <span className="invest-feature">35+ Modules</span>
+            <span className="invest-feature">CVSS</span>
+            <span className="invest-feature">Charts</span>
+            <span className="invest-feature">Export</span>
           </div>
         </div>
       </div>

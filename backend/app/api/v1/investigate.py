@@ -6,6 +6,7 @@ Three investigation endpoints: Person (with structured seed data), Network, Webs
 from fastapi import APIRouter, Depends, HTTPException
 from app.core.security import get_current_user
 from app.services.investigation_orchestrator import orchestrator
+from app.services.vulnerability_scanner import vulnerability_scanner
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -112,4 +113,35 @@ async def investigate_exploit(
         raise HTTPException(status_code=400, detail="Target is required")
 
     result = await orchestrator.investigate_exploit(target)
+    return result
+
+
+@router.post("/vuln-scan")
+async def vulnerability_scan(
+    payload: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Nessus-style unified vulnerability scan against a website / domain.
+
+    Runs the full reconnaissance + enumeration + exploitation module catalogue
+    (35+ modules), then normalises every finding into a Nessus-style record:
+
+        {id, plugin, family, title, severity, cvss, cwe, affected,
+         evidence, solution, references}
+
+    Returns a structured report with:
+      - asset_inventory (IP, ASN, CDN, WAF, TLS, tech, ports, subdomains, …)
+      - severity_distribution (critical / high / medium / low / info)
+      - family_distribution (control families)
+      - top_risks (top critical / high CVSS findings)
+      - executive_summary (markdown narrative)
+      - timeline (per-module run times)
+
+    Input: { "target": "URL/domain" }
+    """
+    target = payload.get("target", "").strip()
+    if not target:
+        raise HTTPException(status_code=400, detail="Target is required")
+
+    result = await vulnerability_scanner.scan(target)
     return result
