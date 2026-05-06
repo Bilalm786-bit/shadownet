@@ -11,6 +11,12 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List
 from app.modules.base import ModuleRegistry, ScanResult as ModuleScanResult
 from app.services.ai_analyst import ai_analyst
+from app.services.owasp_mapper import (
+    annotate_finding as owasp_annotate,
+    summary_stats as owasp_summary_stats,
+    map_finding as owasp_map_finding,
+)
+from app.services.dark_web_correlator import dark_web_correlator
 import structlog
 
 logger = structlog.get_logger(__name__)
@@ -549,6 +555,58 @@ class InvestigationOrchestrator:
         total_modules = len(report["modules_run"])
         critical = sum(1 for r in primary_results if r.severity in ("critical", "high"))
         breach_count = sum(1 for e in report["entities_found"] if e["type"] in ("breach", "breach_mention"))
+
+        # OWASP Top 10 coverage — synthesize findings from entities + module severity
+        synthetic_findings: List[Dict[str, Any]] = []
+        for ent in report["entities_found"]:
+            if ent["type"] not in (
+                "vulnerability", "leaked_secret", "leaked_path", "sensitive_endpoint",
+                "missing_header", "info_disclosure", "cloud_bucket",
+                "dns_misconfig", "email_misconfig",
+            ):
+                continue
+            sev = (ent.get("metadata") or {}).get("severity") or "info"
+            cwe = (ent.get("metadata") or {}).get("cwe")
+            f = {
+                "id": f"{ent['source']}:{ent['value']}",
+                "plugin": ent["source"],
+                "family": (ent.get("metadata") or {}).get("family", ""),
+                "title": (ent.get("metadata") or {}).get("title") or ent["value"],
+                "severity": sev,
+                "cvss": (ent.get("metadata") or {}).get("cvss"),
+                "cwe": cwe,
+                "affected": (ent.get("metadata") or {}).get("url") or target,
+            }
+            owasp_annotate(f)
+            synthetic_findings.append(f)
+        if synthetic_findings:
+            report["owasp_coverage"] = owasp_summary_stats(synthetic_findings)
+
+        # Dark-web correlation phase
+        if progress_cb:
+            await progress_cb({"phase": "dark_web", "message": "Cross-referencing dark-web sources..."})
+        try:
+            asset_for_dw: Dict[str, Any] = {}
+            for ent in report["entities_found"]:
+                meta = ent.get("metadata") or {}
+                if ent["type"] == "email":
+                    asset_for_dw.setdefault("emails", []).append(ent["value"])
+                if ent["type"] == "domain":
+                    asset_for_dw.setdefault("subdomains", []).append(ent["value"])
+                if ent["type"] in ("ip", "ip_address"):
+                    asset_for_dw["ip"] = ent["value"]
+                if meta.get("ip"):
+                    asset_for_dw.setdefault("ip", meta.get("ip"))
+            dark_web = await asyncio.wait_for(
+                dark_web_correlator.correlate(target, asset_inventory=asset_for_dw, findings=synthetic_findings),
+                timeout=120,
+            )
+            report["dark_web"] = dark_web
+            if dark_web.get("risk_uplift"):
+                report["risk_score"] = min(100, report["risk_score"] + dark_web["risk_uplift"])
+        except Exception as e:
+            report["errors"].append(f"dark_web_correlator: {e}")
+            report["dark_web"] = None
 
         report["completed_at"] = datetime.now(timezone.utc).isoformat()
         report["summary"] = (

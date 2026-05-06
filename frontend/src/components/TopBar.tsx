@@ -34,9 +34,13 @@ export default function TopBar({ title }: { title: string }) {
     <header className="topbar">
       <div className="topbar-left">
         <h1 className="topbar-title">{title}</h1>
+        <span className="topbar-status-pill">
+          <span className="dot" />
+          OWASP + DarkWeb online
+        </span>
       </div>
       <div className="topbar-right">
-        <form onSubmit={handleQuick} className="topbar-search" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <form onSubmit={handleQuick} className="topbar-search" style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
           <HiOutlineSearch />
           <input
             className="input" value={query}

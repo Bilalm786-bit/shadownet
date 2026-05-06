@@ -105,20 +105,63 @@ npm run dev
 | `enumeration.s3_buckets` | Discover public S3 / GCS / Azure / DO Spaces buckets |
 
 ### Defensive Vulnerability Detection (read-only)
-| Module | Capabilities |
-|--------|-------------|
-| `exploit.security_headers` | Mozilla-style security-header grade (A+ / F) |
-| `exploit.cve_matcher` | Map detected technologies to CVEs via the public NVD 2.0 API |
-| `exploit.subdomain_takeover` | Detect dangling CNAMEs against 17 SaaS fingerprints |
-| `exploit.cors_misconfig` | Probe unsafe CORS reflection / null-origin / credentialed wildcard |
-| `exploit.open_redirect` | Detect redirect parameters that accept external destinations |
-| `exploit.reflection_probe` | Surface parameters that reflect input into HTML / JS contexts |
-| `exploit.sqli_fingerprint` | Spot SQL stack-trace error strings on malformed parameters |
-| `exploit.secrets_scanner` | Search public GitHub for credentials referencing the target |
-| `exploit.sensitive_files` | Hand-tuned catalogue of high-signal sensitive paths (.env, /actuator/env, dump.sql, .htpasswd, kubeconfig, …) |
-| `exploit.default_creds` | Locate exposed admin / management consoles with known vendor defaults (Tomcat, Jenkins, Grafana, phpMyAdmin, RabbitMQ …) |
-| `exploit.host_header_injection` | Host / X-Forwarded-Host / X-Original-URL injection (cache poison, pwd-reset poison, auth bypass) |
-| `exploit.jwt_analyzer` | Find + decode JWTs in HTML / JS, flag alg=none / weak HS256 / leaked claims |
+| Module | Capabilities | OWASP |
+|--------|-------------|-------|
+| `exploit.security_headers` | Mozilla-style security-header grade (A+ / F) | A05 |
+| `exploit.cve_matcher` | Map detected technologies to CVEs via the public NVD 2.0 API | A06 |
+| `exploit.subdomain_takeover` | Detect dangling CNAMEs against 17 SaaS fingerprints | A01 |
+| `exploit.cors_misconfig` | Probe unsafe CORS reflection / null-origin / credentialed wildcard | A05 |
+| `exploit.open_redirect` | Detect redirect parameters that accept external destinations | A01 |
+| `exploit.reflection_probe` | Surface parameters that reflect input into HTML / JS contexts | A03 |
+| `exploit.sqli_fingerprint` | Spot SQL stack-trace error strings on malformed parameters | A03 |
+| `exploit.secrets_scanner` | Search public GitHub for credentials referencing the target | A07 |
+| `exploit.sensitive_files` | Hand-tuned catalogue of high-signal sensitive paths (.env, /actuator/env, dump.sql, .htpasswd, kubeconfig, …) | A01 |
+| `exploit.default_creds` | Locate exposed admin / management consoles with known vendor defaults | A07 |
+| `exploit.host_header_injection` | Host / X-Forwarded-Host / X-Original-URL injection | A04 |
+| `exploit.jwt_analyzer` | Find + decode JWTs in HTML / JS, flag alg=none / weak HS256 / leaked claims | A02 |
+| `exploit.ssrf_probe` | Server-Side Request Forgery — sentinel reflection + internal-error fingerprints | **A10** |
+| `exploit.ssti_probe` | Server-Side Template Injection — math eval payloads (Jinja, Twig, Smarty, FreeMarker, ERB) | A03 |
+| `exploit.xxe_probe` | XML External Entity — DOCTYPE / parser-error fingerprints | A05 |
+| `exploit.graphql_audit` | GraphQL endpoint discovery, introspection enabled, GraphiQL/Playground exposed | A01/A05 |
+| `exploit.cookie_audit` | Set-Cookie audit: Secure / HttpOnly / SameSite / lifetime / scope | A05/A07 |
+| `exploit.auth_bypass` | Header / path-confusion auth bypass (X-Original-URL, double-slash, %2e/) | A07 |
+| `exploit.cache_poisoning` | Web Cache Deception + cache-key incoherence pre-conditions | A04 |
+
+## 🎯 OWASP Top 10 (2021) Mapping
+
+Every finding is annotated with its **OWASP Top 10 (2021)** category via a CWE→OWASP table covering ~150 CWE IDs. The vuln-scan response includes:
+
+```json
+{
+  "owasp_coverage": {
+    "categories": [
+      {"code": "A01", "id": "A01:2021", "title": "Broken Access Control",
+       "count": 4, "severity_max": "high",
+       "by_severity": {"critical": 0, "high": 2, "medium": 1, "low": 1, "info": 0},
+       "reference": "https://owasp.org/Top10/A01_2021-Broken_Access_Control/"},
+      ...
+    ],
+    "categories_covered": 7,
+    "categories_total": 10,
+    "highest_risk_categories": [...]
+  }
+}
+```
+
+The frontend renders this as a radar chart + 10-category coverage matrix (one card per category with severity histogram).
+
+## 🌐 Dark Web Correlation
+
+Every scan and every investigation runs a `DarkWebCorrelator` after the main module sweep. It pulls the asset inventory (domain, IPs, emails, leaked secrets, ASN org) and queries every dark-web / breach module in parallel:
+
+- `darkweb.onion_search` — Ahmia.fi clearnet bridge to .onion search
+- `breach.paste_monitor` — Pastebin / Ghostbin / GitHub Gist / Pastenow
+- `breach.breach_checker` — HIBP-style breach DB
+- `breach.google_dorker` — targeted Google dork queries
+- `breach.tavily_search` — AI-assisted dark-web aware search
+- `threat.intel_lookup` — 10 live threat-intel feeds (URLhaus, ThreatFox, OpenPhish, PhishTank, CISA KEV, NVD, OTX, GitHub advisories, Tor exit list, Spamhaus DROP/EDROP)
+
+Output is a normalized list of indicators (category, source, value, severity, description, URL, first_seen, tags, query) with category counts, severity counts, an automatic risk-score uplift (0–30), and an executive summary string. The frontend renders this as a Dark Web tab with category filters and per-indicator rows — never raw JSON.
 
 > The `exploit.*` modules are **non-destructive**. They issue benign sentinels and inspect responses; they never carry live exploit payloads. Use them only against assets you own or are explicitly authorized to test.
 

@@ -96,51 +96,54 @@ export default function DashboardPage() {
 
   return (
     <div className="fade-in">
-      {/* Top Hero — Threat status banner */}
-      <div className="card" style={{
-        marginBottom: 24, padding: 20, display: 'flex', alignItems: 'center',
-        gap: 20, flexWrap: 'wrap', borderLeft: '3px solid var(--red)',
-        background: 'linear-gradient(135deg, rgba(239,68,68,0.05), rgba(245,158,11,0.03))',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 280 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 12,
-            background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center',
-            justifyContent: 'center', fontSize: 28, color: 'var(--red)',
-          }}><HiOutlineShieldExclamation /></div>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>Threat Intelligence Posture</div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              {tStats.total_indicators || 0} live indicators tracked across {Object.keys(tStats.by_source || {}).length} feeds •{' '}
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                color: wsConnected ? 'var(--green)' : 'var(--red)',
-              }}>
-                <span style={{
-                  width: 6, height: 6, borderRadius: '50%',
-                  background: wsConnected ? 'var(--green)' : 'var(--red)',
-                }} className={wsConnected ? 'pulse' : ''} />
-                {wsConnected ? 'live stream active' : 'live stream offline'}
-              </span>
+      {/* Hero */}
+      <div className="hero-header" style={{ marginBottom: 22 }}>
+        <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 18 }}>
+          <div style={{ flex: 1, minWidth: 280 }}>
+            <h1 className="hero-title">ShadowNet Command Center</h1>
+            <p className="hero-subtitle">
+              Industry-grade OSINT + vulnerability platform. 60+ modules across reconnaissance,
+              enumeration, exploitation, with full <strong>OWASP Top 10 (2021) mapping</strong> and live
+              <strong> dark-web correlation</strong> against breach DBs, paste sites, .onion search engines, and 10+ threat-intel feeds.
+            </p>
+            <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+              <button className="btn btn-primary" onClick={() => navigate('/investigate/vuln-scan')}>
+                <HiOutlineShieldExclamation /> Run Vulnerability Scan
+              </button>
+              <button className="btn btn-ghost" onClick={() => navigate('/threat-intel')}>
+                Open Threat Center
+              </button>
             </div>
           </div>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {[
+              { label: 'Critical', value: sevCounts.critical || 0, color: 'var(--red)' },
+              { label: 'High', value: sevCounts.high || 0, color: 'var(--orange)' },
+              { label: 'Medium', value: sevCounts.medium || 0, color: 'var(--cyan)' },
+              { label: 'IOCs', value: tStats.total_indicators || 0, color: 'var(--accent)' },
+            ].map(s => (
+              <div key={s.label} style={{ textAlign: 'center', minWidth: 70 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 800, color: s.color, lineHeight: 1, letterSpacing: '-0.03em' }}>
+                  {s.value}
+                </div>
+                <div style={{ fontSize: 10.5, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1.2, marginTop: 6, fontWeight: 600 }}>
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 16 }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--red)' }}>{sevCounts.critical || 0}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>Critical</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--orange)' }}>{sevCounts.high || 0}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>High</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--cyan)' }}>{sevCounts.medium || 0}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>Medium</div>
-          </div>
-          <button className="btn btn-primary" onClick={() => navigate('/threat-intel')}>
-            Open Threat Center
-          </button>
+        <div style={{
+          position: 'absolute', bottom: 16, right: 24, fontSize: 11,
+          display: 'inline-flex', alignItems: 'center', gap: 6, zIndex: 1,
+          color: wsConnected ? 'var(--green)' : 'var(--text-muted)',
+        }}>
+          <span style={{
+            width: 8, height: 8, borderRadius: '50%',
+            background: wsConnected ? 'var(--green)' : 'var(--text-muted)',
+            boxShadow: wsConnected ? '0 0 8px var(--green)' : 'none',
+          }} className={wsConnected ? 'pulse' : ''} />
+          {wsConnected ? 'Live threat stream active' : 'Live stream offline'}
         </div>
       </div>
 
