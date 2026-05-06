@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   HiOutlineDocumentReport, HiOutlineFire, HiOutlineCog, HiOutlineClock,
-  HiOutlineDownload, HiOutlineLightningBolt,
+  HiOutlineDownload, HiOutlineLightningBolt, HiOutlineGlobe, HiOutlineBookmark,
 } from 'react-icons/hi';
 import SeverityDonut from './SeverityDonut';
 import SeverityLegend from './SeverityLegend';
@@ -10,8 +10,12 @@ import RiskScoreCard from './RiskScoreCard';
 import AssetInventoryView from './AssetInventory';
 import FindingsTable, { Finding } from './FindingsTable';
 import ScanTimeline from './ScanTimeline';
+import KpiBar from './KpiBar';
+import OwaspRadar from './OwaspRadar';
+import OwaspCoverage from './OwaspCoverage';
+import DarkWebPanel from './DarkWebPanel';
 
-type Tab = 'overview' | 'findings' | 'inventory' | 'timeline';
+type Tab = 'overview' | 'findings' | 'owasp' | 'darkweb' | 'inventory' | 'timeline';
 
 interface OrchestratorReport {
   category: string;
@@ -24,6 +28,8 @@ interface OrchestratorReport {
   summary?: string;
   errors?: string[];
   timeline?: any[];
+  owasp_coverage?: { categories?: any[]; categories_covered?: number };
+  dark_web?: any;
 }
 
 const SEV_TO_CVSS: Record<string, number> = { critical: 9.5, high: 7.5, medium: 5.0, low: 3.5, info: 0.0 };
@@ -276,50 +282,38 @@ export default function InvestigationReport({ report, emoji = '🔎' }: Props) {
     a.click(); URL.revokeObjectURL(url);
   };
 
+  const owasp = report.owasp_coverage;
+  const darkWeb = report.dark_web;
+
   return (
     <div className="slide-up">
-      <div style={{
-        display: 'flex', gap: 16, alignItems: 'center', padding: 14, marginBottom: 16,
-        background: 'var(--bg-card)', borderRadius: 12, border: '1px solid var(--border-glass)',
-      }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Target</div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 16, fontWeight: 600 }}>{report.target}</div>
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Modules</div>
-          <div style={{ fontSize: 14 }}>
-            <strong style={{ color: 'var(--green)' }}>{report.modules_run?.length || 0}</strong> succeeded
-          </div>
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Findings</div>
-          <div style={{ fontSize: 14 }}>
-            <strong style={{ color: dist.critical ? 'var(--red)' : dist.high ? 'var(--orange)' : 'var(--green)' }}>
-              {findings.length}
-            </strong> total
-          </div>
-        </div>
-        <button className="btn btn-ghost btn-sm" onClick={exportCsv}><HiOutlineDownload /> CSV</button>
+      <KpiBar kpis={[
+        { label: 'Target', value: <span style={{ fontFamily: 'var(--font-mono)', fontSize: 15 }}>{report.target}</span> },
+        { label: 'Modules', value: report.modules_run?.length || 0, color: 'var(--green)' },
+        { label: 'Findings', value: findings.length, color: dist.critical ? 'var(--red)' : dist.high ? 'var(--orange)' : 'var(--green)' },
+        { label: 'Critical / High', value: `${dist.critical || 0} / ${dist.high || 0}`, color: dist.critical ? 'var(--red)' : 'var(--orange)' },
+        { label: 'Risk', value: `${report.risk_score || 0}/100`, color: (report.risk_score || 0) >= 50 ? 'var(--red)' : 'var(--accent)' },
+        ...(owasp ? [{ label: 'OWASP', value: `${owasp.categories_covered || 0}/10`, color: 'var(--accent)' }] : []),
+        ...(darkWeb ? [{ label: 'Dark Web', value: darkWeb.indicator_count || 0, color: 'var(--purple)' }] : []),
+      ]} />
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14 }}>
+        <button className="btn btn-ghost btn-sm" onClick={exportCsv}><HiOutlineDownload /> Export CSV</button>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 18, borderBottom: '1px solid var(--border-glass)', overflowX: 'auto' }}>
+      <div className="tab-strip">
         {[
           { id: 'overview', label: 'Overview', icon: <HiOutlineDocumentReport /> },
           { id: 'findings', label: `Findings (${findings.length})`, icon: <HiOutlineFire /> },
-          { id: 'inventory', label: 'Asset Inventory', icon: <HiOutlineCog /> },
+          ...(owasp ? [{ id: 'owasp', label: `OWASP (${owasp.categories_covered || 0}/10)`, icon: <HiOutlineBookmark /> }] : []),
+          ...(darkWeb ? [{ id: 'darkweb', label: `Dark Web (${darkWeb.indicator_count || 0})`, icon: <HiOutlineGlobe /> }] : []),
+          { id: 'inventory', label: 'Inventory', icon: <HiOutlineCog /> },
           { id: 'timeline', label: `Modules (${timeline.length})`, icon: <HiOutlineClock /> },
         ].map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id as Tab)}
-            className="btn btn-ghost btn-sm"
-            style={{
-              border: 'none', borderRadius: 0, padding: '12px 16px',
-              borderBottom: tab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
-              color: tab === t.id ? 'var(--accent)' : 'var(--text-secondary)',
-              fontWeight: tab === t.id ? 600 : 500,
-            }}
+            className={`tab-button ${tab === t.id ? 'active' : ''}`}
           >
             {t.icon} {t.label}
           </button>
@@ -413,6 +407,25 @@ export default function InvestigationReport({ report, emoji = '🔎' }: Props) {
       )}
 
       {tab === 'findings' && <FindingsTable findings={findings} />}
+      {tab === 'owasp' && owasp && (
+        <div className="slide-up">
+          <div className="card" style={{ padding: 22, marginBottom: 18 }}>
+            <h3 className="result-section-title">
+              <HiOutlineBookmark /> OWASP Top 10 (2021) Coverage Map
+            </h3>
+            <OwaspRadar categories={owasp.categories || []} />
+          </div>
+          <div className="card" style={{ padding: 22 }}>
+            <h3 className="result-section-title">Categories</h3>
+            <OwaspCoverage categories={owasp.categories || []} />
+          </div>
+        </div>
+      )}
+      {tab === 'darkweb' && darkWeb && (
+        <div className="card" style={{ padding: 22 }}>
+          <DarkWebPanel report={darkWeb} />
+        </div>
+      )}
       {tab === 'inventory' && <AssetInventoryView asset={asset} />}
       {tab === 'timeline' && (
         <div className="card" style={{ padding: 20 }}>

@@ -1,8 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { HiOutlineViewGrid, HiOutlineFolder, HiOutlineGlobe, HiOutlineBell,
+import {
+  HiOutlineViewGrid, HiOutlineFolder, HiOutlineGlobe, HiOutlineBell,
   HiOutlineSearch, HiOutlineChartBar, HiOutlineShieldCheck, HiOutlineLightningBolt,
   HiOutlineUser, HiOutlineGlobeAlt, HiOutlineCode, HiOutlineShieldExclamation,
-  HiOutlineFire, HiOutlineDocumentReport } from 'react-icons/hi';
+  HiOutlineFire, HiOutlineDocumentReport,
+} from 'react-icons/hi';
 
 const investigateItems = [
   { to: '/investigate/person', icon: <HiOutlineUser />, label: 'Person Intel' },
@@ -30,7 +32,10 @@ const toolItems = [
 export default function Sidebar() {
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">⬡ ShadowNet</div>
+      <div className="sidebar-logo">
+        <span className="sidebar-logo-glyph">⬡</span>
+        ShadowNet
+      </div>
       <nav className="sidebar-nav">
         <div className="nav-section">Investigations</div>
         {investigateItems.map(item => (
@@ -56,9 +61,9 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-glass)', fontSize: 11, color: 'var(--text-muted)' }}>
-        <HiOutlineShieldCheck style={{ marginRight: 6, verticalAlign: 'middle' }} />
-        ShadowNet v2.0.0
+      <div className="sidebar-footer">
+        <HiOutlineShieldCheck style={{ color: 'var(--green)' }} />
+        <span>ShadowNet v3.0 — OWASP + DarkWeb fusion</span>
       </div>
     </aside>
   );
