@@ -361,4 +361,47 @@ try:
 except Exception as e:
     logger.warning("[-] Failed to load exploit.jwt_analyzer", error=str(e))
 
+# ─── Industry-grade vulnerability modules ──────────────
+try:
+    from app.modules.exploit.ssrf_probe import SSRFProbe
+    logger.info("[+] Module loaded: exploit.ssrf_probe")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.ssrf_probe", error=str(e))
+
+try:
+    from app.modules.exploit.ssti_probe import SSTIProbe
+    logger.info("[+] Module loaded: exploit.ssti_probe")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.ssti_probe", error=str(e))
+
+try:
+    from app.modules.exploit.xxe_probe import XXEProbe
+    logger.info("[+] Module loaded: exploit.xxe_probe")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.xxe_probe", error=str(e))
+
+try:
+    from app.modules.exploit.graphql_audit import GraphQLAudit
+    logger.info("[+] Module loaded: exploit.graphql_audit")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.graphql_audit", error=str(e))
+
+try:
+    from app.modules.exploit.cookie_audit import CookieAudit
+    logger.info("[+] Module loaded: exploit.cookie_audit")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.cookie_audit", error=str(e))
+
+try:
+    from app.modules.exploit.auth_bypass import AuthBypass
+    logger.info("[+] Module loaded: exploit.auth_bypass")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.auth_bypass", error=str(e))
+
+try:
+    from app.modules.exploit.cache_poisoning import CachePoisoning
+    logger.info("[+] Module loaded: exploit.cache_poisoning")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.cache_poisoning", error=str(e))
+
 # NOTE: darkweb.onion_crawler is loaded via app.darkweb.__init__ (imported by darkweb API router)
