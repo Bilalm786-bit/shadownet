@@ -17,6 +17,7 @@ import PersonInvestigation from './pages/PersonInvestigation';
 import NetworkInvestigation from './pages/NetworkInvestigation';
 import WebsiteInvestigation from './pages/WebsiteInvestigation';
 import ExploitInvestigation from './pages/ExploitInvestigation';
+import VulnScanPage from './pages/VulnScanPage';
 import ThreatIntelPage from './pages/ThreatIntelPage';
 
 function ProtectedLayout() {
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="/investigate/network" element={<NetworkInvestigation />} />
             <Route path="/investigate/website" element={<WebsiteInvestigation />} />
             <Route path="/investigate/exploit" element={<ExploitInvestigation />} />
+            <Route path="/investigate/vuln-scan" element={<VulnScanPage />} />
             <Route path="/cases" element={<CasesPage />} />
             <Route path="/cases/:caseId" element={<CaseDetailPage />} />
             <Route path="/graph/:caseId" element={<GraphPage />} />
