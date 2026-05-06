@@ -227,6 +227,30 @@ try:
 except Exception as e:
     logger.warning("[-] Failed to load recon.robots_sitemap", error=str(e))
 
+try:
+    from app.modules.recon.dns_advanced import DNSAdvanced
+    logger.info("[+] Module loaded: recon.dns_advanced")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.dns_advanced", error=str(e))
+
+try:
+    from app.modules.recon.tls_audit import TLSAudit
+    logger.info("[+] Module loaded: recon.tls_audit")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.tls_audit", error=str(e))
+
+try:
+    from app.modules.recon.waf_detector import WAFDetector
+    logger.info("[+] Module loaded: recon.waf_detector")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.waf_detector", error=str(e))
+
+try:
+    from app.modules.recon.http_methods import HTTPMethodProbe
+    logger.info("[+] Module loaded: recon.http_methods")
+except Exception as e:
+    logger.warning("[-] Failed to load recon.http_methods", error=str(e))
+
 # ─── Enumeration Modules (active, low-impact) ──────────
 try:
     from app.modules.enumeration.directory_buster import DirectoryBuster
@@ -312,5 +336,29 @@ try:
     logger.info("[+] Module loaded: exploit.secrets_scanner")
 except Exception as e:
     logger.warning("[-] Failed to load exploit.secrets_scanner", error=str(e))
+
+try:
+    from app.modules.exploit.sensitive_files import SensitiveFiles
+    logger.info("[+] Module loaded: exploit.sensitive_files")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.sensitive_files", error=str(e))
+
+try:
+    from app.modules.exploit.default_creds import DefaultCredsProbe
+    logger.info("[+] Module loaded: exploit.default_creds")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.default_creds", error=str(e))
+
+try:
+    from app.modules.exploit.host_header_injection import HostHeaderInjection
+    logger.info("[+] Module loaded: exploit.host_header_injection")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.host_header_injection", error=str(e))
+
+try:
+    from app.modules.exploit.jwt_analyzer import JWTAnalyzer
+    logger.info("[+] Module loaded: exploit.jwt_analyzer")
+except Exception as e:
+    logger.warning("[-] Failed to load exploit.jwt_analyzer", error=str(e))
 
 # NOTE: darkweb.onion_crawler is loaded via app.darkweb.__init__ (imported by darkweb API router)
