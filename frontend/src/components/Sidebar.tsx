@@ -1,12 +1,14 @@
 import { NavLink } from 'react-router-dom';
 import { HiOutlineViewGrid, HiOutlineFolder, HiOutlineGlobe, HiOutlineBell,
   HiOutlineSearch, HiOutlineChartBar, HiOutlineShieldCheck, HiOutlineLightningBolt,
-  HiOutlineUser, HiOutlineGlobeAlt, HiOutlineCode, HiOutlineShieldExclamation } from 'react-icons/hi';
+  HiOutlineUser, HiOutlineGlobeAlt, HiOutlineCode, HiOutlineShieldExclamation,
+  HiOutlineFire } from 'react-icons/hi';
 
 const investigateItems = [
   { to: '/investigate/person', icon: <HiOutlineUser />, label: 'Person Intel' },
   { to: '/investigate/network', icon: <HiOutlineGlobeAlt />, label: 'Network Intel' },
   { to: '/investigate/website', icon: <HiOutlineCode />, label: 'Website Intel' },
+  { to: '/investigate/exploit', icon: <HiOutlineFire />, label: 'Exploit Surface' },
 ];
 
 const navItems = [
