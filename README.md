@@ -89,6 +89,10 @@ npm run dev
 | `recon.reverse_ip` | Co-hosted domains via HackerTarget |
 | `recon.http_fingerprint` | Status, redirect chain, body hash, favicon hash |
 | `recon.robots_sitemap` | Parse robots.txt + sitemap.xml for hidden paths |
+| `recon.dns_advanced` | Zone transfer (AXFR) probe, DMARC / SPF / DKIM, DNSSEC, CAA |
+| `recon.tls_audit` | Qualys-style protocol & cipher audit (POODLE, TLS 1.0/1.1, weak keys, HSTS) |
+| `recon.waf_detector` | Identify WAF / IPS via header + body fingerprint catalogue (25+ vendors) |
+| `recon.http_methods` | Probe risky methods: TRACE, PUT, DELETE, PROPFIND, CONNECT |
 
 ### Active Enumeration
 | Module | Capabilities |
@@ -111,6 +115,10 @@ npm run dev
 | `exploit.reflection_probe` | Surface parameters that reflect input into HTML / JS contexts |
 | `exploit.sqli_fingerprint` | Spot SQL stack-trace error strings on malformed parameters |
 | `exploit.secrets_scanner` | Search public GitHub for credentials referencing the target |
+| `exploit.sensitive_files` | Hand-tuned catalogue of high-signal sensitive paths (.env, /actuator/env, dump.sql, .htpasswd, kubeconfig, …) |
+| `exploit.default_creds` | Locate exposed admin / management consoles with known vendor defaults (Tomcat, Jenkins, Grafana, phpMyAdmin, RabbitMQ …) |
+| `exploit.host_header_injection` | Host / X-Forwarded-Host / X-Original-URL injection (cache poison, pwd-reset poison, auth bypass) |
+| `exploit.jwt_analyzer` | Find + decode JWTs in HTML / JS, flag alg=none / weak HS256 / leaked claims |
 
 > The `exploit.*` modules are **non-destructive**. They issue benign sentinels and inspect responses; they never carry live exploit payloads. Use them only against assets you own or are explicitly authorized to test.
 
@@ -122,6 +130,31 @@ npm run dev
 | Network | `POST /api/v1/investigate/network` | Network recon + ASN + CDN + threat-intel |
 | Website | `POST /api/v1/investigate/website` | Network recon + enumeration + exploit-surface checks |
 | Exploit | `POST /api/v1/investigate/exploit` | Focused enumeration + defensive vuln detection only |
+| **Vuln Scan** | `POST /api/v1/investigate/vuln-scan` | **Nessus-style unified scan** — runs the full 35+ module catalogue and returns a normalized report (findings with `id / plugin / family / title / severity / cvss / cwe / evidence / solution / references`, asset inventory, severity & family distributions, top risks, executive summary, per-module timeline) |
+
+### Vuln-scan response shape
+
+```json
+{
+  "target": "example.com",
+  "duration_ms": 47230,
+  "risk_score": 78,
+  "executive_summary": "Vulnerability scan of example.com identified 23 findings (3 critical, 7 high, ...).",
+  "asset_inventory": {
+    "ip": "93.184.216.34", "asn": 15133, "asn_name": "EDGECAST",
+    "cdn": ["Akamai"], "waf": [], "tls": {"protocols": ["TLSv1.3", "TLSv1.2"], "cipher": "...", "key_bits": 2048},
+    "subdomains": ["..."], "open_ports": [{"port": 443, "service": "HTTPS"}], "tech": ["server:ECS"], ...
+  },
+  "severity_distribution": {"critical": 3, "high": 7, "medium": 9, "low": 4, "info": 0},
+  "family_distribution": [{"family": "TLS / SSL", "count": 5}, ...],
+  "top_risks": [{"id": "...", "plugin": "...", "title": "...", "severity": "critical", "cvss": 9.8, ...}],
+  "findings": [/* full sorted list */],
+  "timeline": [{"module": "...", "ms": 1240, "status": "completed", "severity": "high", "entities": 4}, ...],
+  "modules_run": [...], "modules_total": 35, "errors": []
+}
+```
+
+The `Vuln Scanner` page in the UI consumes this directly and renders it as a Nessus-style dashboard (severity donut, CVSS bar, family bar chart, executive-summary card, top-risks list, sortable & filterable findings table with a per-finding evidence/solution/references drawer, asset-inventory cards, and a per-module timeline). **No raw JSON is shown to the user.**
 
 ## 🛰️ Real-time Threat Intelligence
 
